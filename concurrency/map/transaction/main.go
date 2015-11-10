@@ -1,6 +1,7 @@
 package main
 
 type RequestType int
+
 const (
 	Set = iota
 	Get
@@ -10,16 +11,16 @@ const (
 
 type Request struct {
 	requestType RequestType
-	key   int
-	value string
-	ret   chan string
+	key         int
+	value       string
+	ret         chan string
 	transaction chan Request
 }
 
 func get(m chan Request, key int) string {
 	result := make(chan string)
 	m <- Request{"Get", key, "", result, nil}
-	return <- result
+	return <-result
 }
 
 func set(m chan Request, key int, value string) {
@@ -38,8 +39,8 @@ func endTransaction(m chan Request) {
 
 func HandleRequests(m map[int]string, c chan Request) {
 	for {
-		req := <- c
-		switch (req.requestType) {
+		req := <-c
+		switch req.requestType {
 		case "Get":
 			req.ret <- m[req.key]
 		case "Set":
@@ -53,7 +54,7 @@ func HandleRequests(m map[int]string, c chan Request) {
 }
 
 func runMap(c chan Request) {
-	m := make(map[int] string)
+	m := make(map[int]string)
 	HandleRequests(m, c)
 }
 

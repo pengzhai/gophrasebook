@@ -1,17 +1,18 @@
 package main
+
 import (
-	"sync"
 	"fmt"
+	"sync"
 )
 
 type request struct {
-	key int
+	key   int
 	value string
-	ret chan string
+	ret   chan string
 }
 
 type ConcurrentMap struct {
-	ch chan request
+	ch   chan request
 	init sync.Once
 }
 
@@ -22,13 +23,13 @@ func (cm *ConcurrentMap) Set(key int, value string) string {
 	})
 	result := make(chan string)
 	cm.ch <- request{key, value, result}
-	return <- result
+	return <-result
 }
 
 func runMap(c chan request) {
 	m := make(map[int]string)
 	for {
-		req := <- c
+		req := <-c
 		old := m[req.key]
 		m[req.key] = req.value
 		req.ret <- old
